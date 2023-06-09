@@ -1,5 +1,7 @@
 import os
 
+from PySide6 import QtCore
+from PySide6.QtGui import QScreen
 from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow
 
 from toolbox import read_file
@@ -10,6 +12,15 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.app = app
 
+        center = QScreen.availableGeometry(QApplication.primaryScreen()).center()
+        geo = self.geometry()
+        geo.moveCenter(center)
+        self.setGeometry(geo)
+        width, height = self.screen().size().toTuple()
+        self.resize(width, height)
+
+        app.setStyleSheet('QMainWindow{background-color: black;border: 1px solid black;}')
+
         self.setWindowTitle("Headflow")
 
         # Menu Bar
@@ -19,6 +30,8 @@ class MainWindow(QMainWindow):
         # Open file
         open_file_action = file_menu.addAction("Open")
         open_file_action.triggered.connect(self.open_file)
+        quit_action = file_menu.addAction("Quit")
+        quit_action.triggered.connect(lambda: self.app.quit())
 
         # Init config variables
         self.dir = None
