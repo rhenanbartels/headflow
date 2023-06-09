@@ -1,8 +1,9 @@
 import os
 
-from PySide6 import QtCore
+import numpy
+import pyqtgraph as pg
 from PySide6.QtGui import QScreen
-from PySide6.QtWidgets import QApplication, QFileDialog, QMainWindow
+from PySide6.QtWidgets import QApplication, QFileDialog, QGroupBox, QMainWindow, QVBoxLayout
 
 from toolbox import read_file
 
@@ -19,7 +20,7 @@ class MainWindow(QMainWindow):
         width, height = self.screen().size().toTuple()
         self.resize(width, height)
 
-        app.setStyleSheet('QMainWindow{background-color: black;border: 1px solid black;}')
+        app.setStyleSheet("QMainWindow{background-color: black;border: 1px solid black;}")
 
         self.setWindowTitle("Headflow")
 
@@ -36,15 +37,21 @@ class MainWindow(QMainWindow):
         # Init config variables
         self.dir = None
 
+        # Main layout
+        self.obj1 = pg.PlotWidget()
+        layout = QVBoxLayout()
+        layout.addWidget(self.obj1)
+        box = QGroupBox(self)
+        box.setLayout(layout)
+        self.setCentralWidget(box)
+
     def open_file(self):
         self.file_full_path, _ = QFileDialog.getOpenFileName(
-            self,
-            dir=self.dir or "",
-            caption="Open file",
-            filter="Text files (*.txt)"
+            self, dir=self.dir or "", caption="Open file", filter="Text files (*.txt)"
         )
         if self.file_full_path:
             self.dir = os.path.dirname(self.file_full_path)
             self.file_name = os.path.basename(self.file_full_path)
+
             self.data = read_file(self.file_full_path)
-            print(self.data)
+            self.obj1.plot(numpy.cumsum(self.data), self.data, pen=pg.mkPen(color=(0, 255, 0)))
